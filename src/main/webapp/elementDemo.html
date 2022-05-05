@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .el-table .warning-row {
+            background: oldlace;
+        }
+
+        .el-table .success-row {
+            background: #f0f9eb;
+        }
+    </style>
+    <script src="js/vue.js"></script>
+    <script src="js/axios-0.18.0.js"></script>
+    <script src="element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+</head>
+<body>
+<div id="app">
+
+    <el-form :inline="true" :model="brand" class="demo-form-inline">
+        <el-form-item label="当前状态">
+            <el-select v-model="brand.status" placeholder="当前状态">
+                <el-option label="启用" value="1"></el-option>
+                <el-option label="禁用" value="0"></el-option>
+            </el-select>
+        </el-form-item>
+        <el-form-item label="企业名称">
+            <el-input v-model="brand.companyName" placeholder="企业名称"></el-input>
+        </el-form-item>
+        <el-form-item label="品牌名称">
+            <el-input v-model="brand.brandName" placeholder="品牌名称"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="onSubmit">查询</el-button>
+        </el-form-item>
+    </el-form>
+    <el-button type="danger" @click="delectByIds()">批量删除</el-button>
+    <el-button type="primary" @click="dialogVisible = true">新增</el-button>
+
+    <el-dialog
+            title="编辑品牌"
+            :visible.sync="dialogVisible"
+            width="30%"
+            :before-close="handleClose">
+        <!--        绑定模型才能得到数据-->
+        <el-form ref="form" :model="brand" label-width="80px">
+            <el-form-item label="品牌名称">
+                <el-input v-model="brand.brandName"></el-input>
+            </el-form-item>
+            <el-form-item label="企业名称">
+                <el-input v-model="brand.companyName"></el-input>
+            </el-form-item>
+            <el-form-item label="排序">
+                <el-input v-model="brand.ordered"></el-input>
+            </el-form-item>
+            <el-form-item label="备注">
+                <el-input type="textarea" v-model="brand.description"></el-input>
+            </el-form-item>
+
+            <el-form-item label="状态">
+                <!-- 开关的属性-->
+                <el-switch v-model="brand.status"
+                           active-value="1"
+                           inactive-value="0">
+                </el-switch>
+            </el-form-item>
+
+
+            <el-form-item>
+                <el-button type="primary" @click="addbrand" @click="dialogVisible = false">提交</el-button>
+                <el-button @click="dialogVisible = false">取消</el-button>
+            </el-form-item>
+        </el-form>
+
+    </el-dialog>
+
+
+    <template>
+        <el-table
+                :data="tableData"
+                style="width: 100%"
+                :row-class-name="tableRowClassName"
+                @selection-change="handleSelectionChange">
+
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+
+            <el-table-column
+                    type="index"
+                    width="50">
+            </el-table-column>
+
+            <el-table-column
+                    prop="brandName"
+                    label="品牌名称"
+                    align="center"
+
+            >
+            </el-table-column>
+            <el-table-column
+                    prop="companyName"
+                    label="公司名称"
+                    align="center"
+            >
+            </el-table-column>
+            <el-table-column
+                    prop="ordered"
+                    label="排序"
+                    align="center"
+            >
+            </el-table-column>
+            <el-table-column
+                    prop="description"
+                    label="描述"
+                    align="center"
+            >
+            </el-table-column>
+            <el-table-column
+                    prop="status"
+                    label="状态"
+                    align="center">
+            </el-table-column>
+
+            <el-table-column
+                    align="center"
+                    label="操作">
+
+                <el-table-colum>
+                    <el-button type="primary">修改</el-button>
+                </el-table-colum>
+
+                <el-table-colum>
+                    <el-button type="danger" @clike="delect()"> 删除</el-button>
+                </el-table-colum>
+
+            </el-table-column>
+        </el-table>
+    </template>
+
+    <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[5, 10, 15, 20]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="totall">
+    </el-pagination>
+
+
+</div>
+
+</body>
+<script>
+    new Vue({
+        el: "#app",
+        //加载完成发出异步请求
+        // mounted() {
+        //     var _this = this;
+        //     axios({
+        //         method: "post",
+        //         url: "http://localhost:8080/vuedemo_war_exploded/selectAllServlet"
+        //     }).then(function (resp) {
+        //         _this.tableData = resp.data;
+        //     })
+        // },
+
+        mounted() {
+            var _this = this;
+            axios({
+                method: "post",
+                url: "http://localhost:8080/vuedemo_war_exploded/selectByPageServlet?currentPage="+this.currentPage+"&pageSize="+this.pageSize
+            }).then(function (resp) {
+                _this.tableData = resp.data.brands;
+                _this.totall = resp.data.totallCount;
+
+
+            })
+        },
+        data() {
+            return {
+                totall: "",
+                pageSize: "5",
+                currentPage: "1",
+                form: {
+                    name: '',
+                    region: '',
+                    date1: '',
+                    date2: '',
+                    delivery: false,
+                    type: [],
+                    resource: '',
+                    desc: ''
+                },
+
+                dialogVisible: false,
+
+                brand: {
+                    status: "",
+                    brandName: "",
+                    companyName: "",
+                    id: "",
+                    ordered: "",
+                    description: ""
+                },
+
+                tableData: [{
+                    brandName: '华为',
+                    companyName: '华为科技有限公司',
+                    ordered: '100',
+                    status: "1",
+                    description: ""
+                },/* {
+                    brandName: '华为',
+                    companyName: '华为科技有限公司',
+                    ordered: '100',
+                    status: "1",
+                    description: ""
+                }, {
+                    brandName: '华为',
+                    companyName: '华为科技有限公司',
+                    ordered: '100',
+                    status: "1",
+                    description: ""
+                }, {
+                    brandName: '华为',
+                    companyName: '华为科技有限公司',
+                    ordered: '100',
+                    status: "1",
+                    description: ""
+                }*/],
+
+                multipleSelection: [],
+
+                selectByIds: [],
+
+
+            }
+        },
+        methods: {
+            selectAll(){
+                var _this = this;
+                axios({
+                    method: "post",
+                    url: "http://localhost:8080/vuedemo_war_exploded/selectByPageServlet?currentPage="+this.currentPage+"&pageSize="+this.pageSize
+                }).then(function (resp) {
+                    _this.tableData = resp.data.brands;
+                    _this.totall = resp.data.totallCount;
+
+                })
+            },
+
+            delect() {
+
+            },
+            delectByIds() {
+
+                // console.log(this.multipleSelection);
+                for (let i = 0; i < this.multipleSelection.length; i++) {
+                    let multipleSelectionElement = this.multipleSelection[i];
+                    this.selectByIds[i] = multipleSelectionElement.id;
+                }
+                console.log(this.selectByIds[1])
+                axios({
+                    method: "post",
+                    url: "http://localhost:8080/vuedemo_war_exploded/delectByIdsServlet",
+                    data: this.selectByIds
+                }).then(function (resp) {
+                    if (resp.data == "gan") {
+                        //网页跳转
+                        location.href = "http://localhost:8080/vuedemo_war_exploded/elementDemo.html"
+                        _this.$message({
+                            message: '恭喜你，这是删除成功',
+                            type: 'success'
+                        })
+
+                    }
+
+                })
+
+
+            },
+
+
+            handleSizeChange(val) {
+                console.log(`每页 ${val} 条`);
+                this.pageSize=val;
+                this. selectAll();
+
+
+
+            },
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+                this.currentPage=val;
+                this. selectAll();
+            },
+
+            addbrand() {
+                //console.log(this.brand);
+                var _this = this;
+                axios({
+                    method: "post",
+                    url: "http://localhost:8080/vuedemo_war_exploded/addServlet",
+                    data: _this.brand
+                }).then(function (resp) {
+                    var a = resp.data;
+                    if (resp.data == "gan") {
+                        //网页跳转
+                        location.href = "http://localhost:8080/vuedemo_war_exploded/elementDemo.html";
+                    }
+                    _this.$message({
+                        message: '恭喜你，这是一条成功消息',
+                        type: 'success'
+                    })
+                })
+            },
+            onSubmit() {
+                var _this = this;
+                        axios({
+                            method:"post",
+                            url:"http://localhost:8080/vuedemo_war_exploded/SelectBrandByConditionServlet",
+                            data:_this.brand
+                        }).then(function (resp){
+                            _this.tableData = resp.data
+                        })
+                console.log(this.brand);
+            },
+            tableRowClassName({row, rowIndex}) {
+                if (rowIndex === 1) {
+                    return 'warning-row';
+                } else if (rowIndex === 3) {
+                    return 'success-row';
+                }
+                return '';
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+                console.log(val);
+            }
+        }
+
+    })
+</script>
+
+</html>

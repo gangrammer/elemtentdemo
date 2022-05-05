@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+
+<head>
+    <meta charset="UTF-8">
+    <title>添加品牌</title>
+    <script src="js/axios-0.18.0.js"></script>
+    <script SRC="js/vue.js"></script>
+
+
+</head>
+<body>
+<script src="js/axios-0.18.0.js"></script>
+<script SRC="js/vue.js"></script>
+
+
+<div id="app">
+<h3>添加品牌</h3>
+<form action="" method="post">
+    品牌名称：<input id="brandName"  v-model="brand.brandName" name="brandName"><br>
+    企业名称：<input id="companyName" name="companyName" v-model="brand.companyName"><br>
+    排序：<input id="ordered" name="ordered" v-model="brand.ordered"><br>
+    描述信息：<textarea rows="5" cols="20" id="description" name="description" v-model="brand.description"></textarea><br>
+    状态：
+    <input type="radio" name="status" value="0" v-model="brand.status">禁用
+    <input type="radio" name="status" value="1" v-model="brand.status">启用<br>
+
+    <input type="button" id="btn"  value="提交" @click="submitForm">
+</form>
+</div>
+<script src="js/axios-0.18.0.js"></script>
+<script SRC="js/vue.js"></script>
+
+<script>
+    new Vue({
+        el:"#app",
+        data(){
+            return{
+                //建立模型 用于视图中元素去绑定 当元素中的模型数据改变时 该模式就存入了数据
+                brand:{}
+            }
+        },
+        //方法元素 用于绑定事件中的方法 methods
+        methods:{
+            submitForm(){
+                //用与提高等级让Vue 获得相应的数据
+                var _this=this
+                axios({
+                    method: "post",
+                    url:"http://localhost:8080/vuedemo_war_exploded/addServlet",
+                    data:_this.brand
+                }).then(function (resp){
+                    if(resp.data == "gan"){
+                        location.href = "http://localhost:8080/vuedemo_war_exploded/vuebrand.html";
+                    }
+                })
+            }
+        }
+
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //1. 给按钮绑定单击事件
+   /* document.getElementById("btn").onclick = function () {
+        // 将表单数据转为json
+        var formData = {
+            brandName:"",
+            companyName:"",
+            ordered:"",
+            description:"",
+            status:"",
+        };
+        // 获取表单数据
+        let brandName = document.getElementById("brandName").value;
+        // 设置数据
+        formData.brandName = brandName;
+
+        // 获取表单数据
+        let companyName = document.getElementById("companyName").value;
+        // 设置数据
+        formData.companyName = companyName;
+
+        // 获取表单数据
+        let ordered = document.getElementById("ordered").value;
+        // 设置数据
+        formData.ordered = ordered;
+
+        // 获取表单数据
+        let description = document.getElementById("description").value;
+        // 设置数据
+        formData.description = description;
+
+        let status = document.getElementsByName("status");
+        for (let i = 0; i < status.length; i++) {
+            if(status[i].checked){
+                //
+                formData.status = status[i].value ;
+            }
+        }
+
+        console.log(formData);
+        //2. 发送ajax请求
+        axios({
+            method:"post",
+            url:"http://localhost:8080/vuedemo_war_exploded/addServlet",
+            data:formData
+        }).then(function (resp) {
+            // 判断响应数据是否为 success
+            if(resp.data == "gan"){
+                location.href = "http://localhost:8080/vuedemo_war_exploded/brand.html";
+            }
+        })
+    }*/
+
+
+
+</script>
+</body>
+</html>
